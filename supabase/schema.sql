@@ -21,6 +21,7 @@ create table if not exists public.rs_sitios (
   recomendado_por text,
   que_pedir text,
   notas text,
+  fotos text[] not null default '{}',
   nota numeric(3,1) check (nota between 0 and 10),
   visitado date,
   creado timestamptz not null default now(),
@@ -60,14 +61,16 @@ begin
   v_id := nullif(p_sitio->>'id','')::uuid;
   if v_id is null then
     insert into public.rs_sitios (nombre, categoria, estado, favorito, lat, lng, direccion, zona, gmaps_url, web, telefono, instagram,
-      precio, cocina, para, recomendado_por, que_pedir, notas, nota, visitado)
+      precio, cocina, para, recomendado_por, que_pedir, notas, fotos, nota, visitado)
     values (p_sitio->>'nombre', coalesce(p_sitio->>'categoria','restaurante'), coalesce(p_sitio->>'estado','pendiente'),
       coalesce((p_sitio->>'favorito')::boolean,false), (p_sitio->>'lat')::float8, (p_sitio->>'lng')::float8,
       p_sitio->>'direccion', p_sitio->>'zona', p_sitio->>'gmaps_url', p_sitio->>'web', p_sitio->>'telefono', p_sitio->>'instagram',
       (p_sitio->>'precio')::smallint,
       coalesce(array(select jsonb_array_elements_text(coalesce(p_sitio->'cocina','[]'::jsonb))),'{}'),
       coalesce(array(select jsonb_array_elements_text(coalesce(p_sitio->'para','[]'::jsonb))),'{}'),
-      p_sitio->>'recomendado_por', p_sitio->>'que_pedir', p_sitio->>'notas', (p_sitio->>'nota')::numeric, (p_sitio->>'visitado')::date)
+      p_sitio->>'recomendado_por', p_sitio->>'que_pedir', p_sitio->>'notas',
+      coalesce(array(select jsonb_array_elements_text(coalesce(p_sitio->'fotos','[]'::jsonb))),'{}'),
+      (p_sitio->>'nota')::numeric, (p_sitio->>'visitado')::date)
     returning id into v_id;
   else
     update public.rs_sitios set
@@ -78,6 +81,7 @@ begin
       cocina = coalesce(array(select jsonb_array_elements_text(coalesce(p_sitio->'cocina','[]'::jsonb))),'{}'),
       para = coalesce(array(select jsonb_array_elements_text(coalesce(p_sitio->'para','[]'::jsonb))),'{}'),
       recomendado_por = p_sitio->>'recomendado_por', que_pedir = p_sitio->>'que_pedir', notas = p_sitio->>'notas',
+      fotos = coalesce(array(select jsonb_array_elements_text(coalesce(p_sitio->'fotos','[]'::jsonb))),'{}'),
       nota = (p_sitio->>'nota')::numeric, visitado = (p_sitio->>'visitado')::date, actualizado = now()
     where id = v_id;
     if not found then raise exception 'no_existe'; end if;

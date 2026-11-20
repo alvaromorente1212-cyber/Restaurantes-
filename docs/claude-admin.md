@@ -21,6 +21,7 @@
 | `cocina` | `text[]`, p. ej. `{Española,Arroces}` |
 | `para` | `text[]` con `pareja`, `familia`, `ninos`, `amigos`, `trabajo`, `perro` |
 | `recomendado_por`, `que_pedir`, `notas` | texto |
+| `fotos` | `text[]` con URLs de imágenes públicas (web del local, prensa…); la primera es la miniatura |
 | `nota` | 0 a 10 (solo si `probado`), `visitado` fecha |
 
 ## Cómo añadir un sitio

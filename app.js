@@ -324,7 +324,7 @@
     if (s.zona) meta.push(esc(s.zona));
     if (s.precio) meta.push(PRICE[s.precio - 1]);
     return `<li><button type="button" class="card" data-id="${s.id}">
-      <span class="disc" style="background:${c.color}1F">${c.em}${s.estado === "pendiente" ? `<i class="ring" aria-hidden="true"></i>` : ""}</span>
+      <span class="disc" style="background:${c.color}1F">${(s.fotos || [])[0] ? `<img src="${esc(s.fotos[0])}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}${c.em}${s.estado === "pendiente" ? `<i class="ring" aria-hidden="true"></i>` : ""}</span>
       <span>
         <span class="card-name">${esc(s.nombre)}${s.favorito ? `<span class="heart" aria-label="Favorito">❤</span>` : ""}</span>
         <span class="card-meta">${meta.map((m) => `<span>${m}</span>`).join("") || `<span>${c.one}</span>`}</span>
@@ -477,6 +477,7 @@
           <button type="button" class="icon-btn" data-act="back" aria-label="Cerrar">${ICON.close}</button>
         </div>
       </div>
+      ${(s.fotos || []).length ? `<div class="gallery" role="list" aria-label="Fotos">${s.fotos.map((u, i) => `<a role="listitem" href="${esc(u)}" target="_blank" rel="noopener"><img src="${esc(u)}" alt="Foto ${i + 1} de ${esc(s.nombre)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.remove()"></a>`).join("")}</div>` : ""}
       <span class="d-cat" style="color:${c.color}">${c.em} ${c.one}</span>
       <h2 class="d-name">${esc(s.nombre)}</h2>
       <div class="d-facts">${facts.join("")}</div>
@@ -713,7 +714,7 @@
 
   function openEditor(s, { focus } = {}) {
     if (!canEdit()) return askKey(() => openEditor(s, { focus }));
-    draft = { cocina: [], para: [], ...JSON.parse(JSON.stringify(s)) };
+    draft = { cocina: [], para: [], fotos: [], ...JSON.parse(JSON.stringify(s)) };
     $("#editorTitle").textContent = s.id ? "Editar sitio" : "Nuevo sitio";
     $("#editor").hidden = false;
     drawEditor();
@@ -796,6 +797,13 @@
           </div>
           <label class="field"><span>Día que fuiste</span><input class="input" id="f-visitado" type="date" value="${esc(d.visitado || "")}"></label>` : ""}
         <label class="switch-row"><span>❤️ Favorito</span><input type="checkbox" class="switch" id="f-fav" ${d.favorito ? "checked" : ""}></label>
+      </div>
+
+      <div class="group">
+        <h3>Fotos</h3>
+        <p class="help">Pega la dirección de una imagen (de su web, de Instagram…). La primera sale en la lista.</p>
+        ${(d.fotos || []).length ? `<div class="photo-edit">${d.fotos.map((u, i) => `<span class="ph"><img src="${esc(u)}" alt="" referrerpolicy="no-referrer"><button type="button" data-rmfoto="${i}" aria-label="Quitar foto">✕</button></span>`).join("")}</div>` : ""}
+        <div class="row-add"><input class="input" id="f-foto" type="url" inputmode="url" placeholder="https://…jpg"><button type="button" class="btn btn-soft btn-sm" data-act="addfoto">Añadir</button></div>
       </div>
 
       <div class="group">
@@ -926,6 +934,13 @@
     }
     const add = e.target.closest("[data-add]");
     if (add) return addCocina(add.dataset.add);
+    if (e.target.closest("[data-act=addfoto]")) {
+      const u = ($("#f-foto").value || "").trim();
+      if (!/^https?:\/\//.test(u)) { toast("Pega una dirección que empiece por https://"); return; }
+      syncDraft(); draft.fotos = [...(draft.fotos || []), u]; return redraw();
+    }
+    const rf = e.target.closest("[data-rmfoto]");
+    if (rf) { syncDraft(); draft.fotos.splice(+rf.dataset.rmfoto, 1); return redraw(); }
     const rm = e.target.closest("[data-rm]");
     if (rm) { syncDraft(); draft.cocina.splice(+rm.dataset.rm, 1); return redraw(); }
     if (e.target.closest(".taginput") && !e.target.closest("button")) $("#f-cocina-in")?.focus();
@@ -1019,7 +1034,7 @@
       lat: d.lat, lng: d.lng, direccion: d.direccion || null, zona: d.zona || null, gmaps_url: d.gmaps_url || null,
       web: d.web || null, telefono: d.telefono || null, instagram: d.instagram || null, precio: d.precio || null,
       cocina: d.cocina || [], para: d.para || [], recomendado_por: d.recomendado_por || null, que_pedir: d.que_pedir || null,
-      notas: d.notas || null, nota: d.estado === "probado" ? (d.nota ?? null) : null, visitado: d.estado === "probado" ? (d.visitado || null) : null,
+      notas: d.notas || null, fotos: d.fotos || [], nota: d.estado === "probado" ? (d.nota ?? null) : null, visitado: d.estado === "probado" ? (d.visitado || null) : null,
     };
     const btn = $("#editorSave");
     btn.disabled = true; btn.textContent = "Guardando…";
