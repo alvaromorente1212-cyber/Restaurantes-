@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+  <title>Chinchetas</title>
+  <meta name="description" content="Los sitios que me recomiendan, en un mapa: restaurantes, bares, cafés y planes.">
+  <meta name="theme-color" content="#4B1D6B">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Chinchetas">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Young+Serif&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="vendor/leaflet/MarkerCluster.css">
+  <link rel="stylesheet" href="styles.css?v=1">
+</head>
+<body>
+  <div id="map" role="application" aria-label="Mapa de sitios"></div>
+
+  <!-- Barra superior flotante -->
+  <header class="topbar">
+    <div class="searchbar">
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Buscar en mis sitios" autocomplete="off" enterkeyhint="search" aria-label="Buscar en mis sitios">
+      <button class="filters-btn" id="filtersBtn" type="button" aria-label="Más filtros">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+        <span class="badge" id="filtersCount" hidden></span>
+      </button>
+      <button class="settings-btn" id="settingsBtn" type="button" aria-label="Ajustes">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1.2-3.6 4-5 7-5s5.8 1.4 7 5"/></svg>
+        <i class="lock-dot" id="lockDot" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="chips" id="chips" role="group" aria-label="Filtrar"></div>
+  </header>
+
+  <!-- Botones flotantes del mapa -->
+  <div class="map-fabs" id="mapFabs">
+    <button class="round-btn" id="locateBtn" type="button" aria-label="Centrar en mi ubicación">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" class="fill"/></svg>
+    </button>
+    <button class="add-btn" id="addBtn" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      <span>Añadir sitio</span>
+    </button>
+  </div>
+
+  <!-- Panel inferior: lista y ficha -->
+  <section class="sheet" id="sheet" aria-label="Sitios">
+    <div class="sheet-handle" id="sheetHandle">
+      <span class="grip" aria-hidden="true"></span>
+    </div>
+    <div class="sheet-scroll" id="sheetScroll">
+      <div id="listView"></div>
+      <div id="detailView" hidden></div>
+    </div>
+  </section>
+
+  <!-- Elegir punto en el mapa -->
+  <div class="picker" id="picker" hidden>
+    <div class="picker-pin" aria-hidden="true">
+      <svg viewBox="0 0 40 56"><path d="M20 54 L20 34" stroke="#1B2238" stroke-width="3" stroke-linecap="round"/><circle cx="20" cy="20" r="16" fill="#4B1D6B" stroke="#fff" stroke-width="4"/></svg>
+    </div>
+    <div class="picker-bar">
+      <p>Mueve el mapa hasta dejar la chincheta en el sitio</p>
+      <div class="picker-actions">
+        <button class="btn btn-ghost" id="pickerCancel" type="button">Cancelar</button>
+        <button class="btn btn-primary" id="pickerOk" type="button">Usar este punto</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Editor de sitio -->
+  <section class="editor" id="editor" role="dialog" aria-modal="true" aria-labelledby="editorTitle" hidden>
+    <header class="editor-head">
+      <button class="btn btn-ghost" id="editorCancel" type="button">Cancelar</button>
+      <h2 id="editorTitle">Nuevo sitio</h2>
+      <button class="btn btn-primary btn-sm" id="editorSave" type="button">Guardar</button>
+    </header>
+    <form class="editor-body" id="editorForm" novalidate></form>
+  </section>
+
+  <!-- Filtros -->
+  <dialog class="modal" id="filtersDialog" aria-labelledby="filtersTitle">
+    <div class="modal-body" id="filtersBody"></div>
+  </dialog>
+
+  <!-- Ajustes y clave -->
+  <dialog class="modal" id="settingsDialog" aria-labelledby="settingsTitle">
+    <div class="modal-body" id="settingsBody"></div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="vendor/supabase.js"></script>
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <script src="vendor/leaflet/leaflet.markercluster.js"></script>
+  <script src="config.js?v=1"></script>
+  <script src="app.js?v=1"></script>
+</body>
+</html>
